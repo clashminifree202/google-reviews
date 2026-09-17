@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { User, Lock, ArrowRight } from 'lucide-react'
-import { SmokeyBackground } from './smokey-background'
+
+export { SmokeyBackground }
 
 export function LoginForm() {
   const [phone, setPhone] = useState('')

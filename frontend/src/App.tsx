@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { apiLogin, apiRegister, apiConfirm } from './api'
+import { apiLogin, apiRegister, apiConfirm, apiRedeem } from './api'
 
 export function App() {
   const [view, setView] = useState<'login' | 'register' | 'redeem' | 'main'>('login')
@@ -240,38 +240,6 @@ export function App() {
   )
 }
 
-async function apiLogin(phone: string) {
-  const res = await fetch('/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone }),
-  })
-  return res.json()
-}
+export default App
 
-async function apiRegister(phone: string, firstName: string, lastName: string) {
-  const res = await fetch('/api/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone, first_name: firstName, last_name: lastName }),
-  })
-  return res.json()
-}
 
-async function apiConfirm(phone: string) {
-  const res = await fetch('/api/confirm', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone }),
-  })
-  return res.json()
-}
-
-async function apiRedeem(key: string, firstName: string, lastName: string, phone: string, webhook: string) {
-  const res = await fetch('/api/redeem', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key, first_name: firstName, last_name: lastName, phone, webhook }),
-  })
-  return res.json()
-}

@@ -1,4 +1,5 @@
-import { SmokeyBackground, LoginForm } from '@/components/ui/login-form'
+import { LoginForm } from '@/components/ui/login-form'
+import { SmokeyBackground } from '@/components/ui/smokey-background'
 
 export default function DemoOne() {
   return (

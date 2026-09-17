@@ -188,16 +188,21 @@ async def index(_: web.Request) -> web.Response:
         "<h1>PlaceID <span class=grad>de Google Maps</span></h1>"
         "<p>Convierte cualquier enlace de Google Maps en el Place ID exacto "
         "y el enlace directo de reseña en segundos.</p>"
-        "<div class=buttons>"
-        "<a href='/canjear' class='btn primary'>🎟️ Canjear Licencia</a>"
-        "<a href='/app' class='btn ghost'>📱 Entrar con Teléfono</a>"
-        "</div></div>"
-        "<div class=divider></div>"
-        "<div class=stats fade-in>"
+        "</div>"
+        "<div class=fade-in style='max-width:600px;margin:0 auto'>"
+        "<div class=card style='padding:24px;margin-bottom:24px'>"
+        "<form onsubmit='lookup(event)' style='display:flex;gap:10px'>"
+        "<input id=url placeholder='https://maps.app.goo.gl/...' autofocus>"
+        "<button type=submit class='btn primary' style='width:auto'>Buscar</button>"
+        "</form>"
+        "<div id=out style='margin-top:16px'></div>"
+        "</div>"
+        "<div class=stats>"
         "<div class=stat><div class=number>3</div><div class=label>Búsquedas gratis / 24h</div></div>"
         "<div class=stat><div class=number>∞</div><div class=label>Plan PRO ilimitado</div></div>"
         "<div class=stat><div class=number>⚡</div><div class=label>Instantáneo</div></div>"
         "<div class=stat><div class=number>💬</div><div class=label>Chat Discord</div></div>"
+        "</div>"
         "</div>"
         "<div class=divider></div>"
         "<section class=fade-in>"
@@ -231,31 +236,13 @@ async def index(_: web.Request) -> web.Response:
         "o contacta directamente por el chat de la web.</p>"
         "</section>"
     )
-    return page("PlaceID Bot", body)
+    return page("PlaceID Bot", body, JS_APP)
 
 async def app_page(request: web.Request) -> web.Response:
     user = await current_user(request)
     if not user:
         return web.HTTPFound("/")
-    body = (
-        "<div class=fade-in>"
-        f"<div class=login-box>"
-        f"<h3 style='margin-bottom:16px'>{user['first_name']}</h3>"
-        f"<p style='color:#8899aa'><code>{user['phone']}</code></p>"
-        f"<div style='text-align:center;font-size:32px;font-weight:900;"
-        f"background:linear-gradient(135deg,#3b82f6,#8b5cf6);"
-        f"-webkit-background-clip:text;-webkit-text-fill-color:transparent;"
-        f"margin:16px 0'><b id=q>…</b> gratis hoy</div>"
-        "</div>"
-        "<div class=card><form onsubmit='lookup(event)' style='display:flex;gap:10px'>"
-        "<input id=url placeholder='https://maps.app.goo.gl/...' autofocus>"
-        "<button type=submit class='btn primary' style='width:auto'>Buscar</button>"
-        "</form></div>"
-        "<div id=out style='margin-top:16px'></div>"
-        "<script>" + JS_APP + "</script>"
-        "</div>"
-    )
-    return page("Panel", body)
+    raise web.HTTPFound("/")
 
 async def chat_page(request: web.Request) -> web.Response:
     user = await current_user(request)

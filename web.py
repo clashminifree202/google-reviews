@@ -115,19 +115,16 @@ CSS = (
     ".toast.show{transform:translateY(0);opacity:1}"
     ".login-box{max-width:420px;margin:40px auto;padding:40px;"
     "background:linear-gradient(145deg,rgba(16,22,40,0.95),"
-    "rgba(10,16,30,0.98));border-radius:24px;border:1px solid rgba(30,50,80,0.6)"
+    "rgba(10,16,30,0.98));border-radius:24px;border:1px solid rgba(30,50,80,0.6);"
     "box-shadow:0 20px 60px rgba(0,0,0,0.4)}"
     ".login-box h2{font-size:28px;font-weight:800;margin-bottom:8px}"
     ".login-box p{color:#8899aa;font-size:15px;margin-bottom:24px}"
     ".login-box input{margin-bottom:4px}"
-    "nav .menu-mobile{display:none}"
     "@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}"
     "to{opacity:1;transform:translateY(0)}}"
     ".fade-in{animation:fadeIn .6s ease forwards}"
-    "@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}"
-    ".pulse{animation:pulse 2s infinite}"
     ".spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);"
-    "border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block}"
+    "border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}"
     "@keyframes spin{to{transform:rotate(360deg)}}"
     "@media(max-width:768px){.hero h1{font-size:34px}"
     ".hero{padding:60px 0 40px}nav{padding:12px 16px}"
@@ -140,7 +137,7 @@ let last=0;
 async function poll(){try{const r=await fetch('/api/messages?since='+last);const d=await r.json();if(d.ok){for(const m of d.messages){add(m);last=Math.max(last,m.id);}}}catch(e){}setTimeout(poll,2000);}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function add(m){const w=document.getElementById('msgs');const d=document.createElement('div');d.className='msg '+(m.direction==='out'?'me':'them');let h='<b>'+esc(m.author||'')+'</b>';if(m.text)h+='<br>'+esc(m.text).replace(/\\n/g,'<br>');if(m.image)h+='<br><img class=chat src='+m.image+'>';d.innerHTML=h;w.appendChild(d);w.scrollTop=w.scrollHeight;}
-async function send(ev){ev.preventDefault();const t=document.getElementById('t');const f=document.getElementById('f');const fd=new FormData();fd.append('text',t.value);if(f.files[0])fd.append('photo',f.files[0]);t.value='';f.value='';const btn=document.querySelector('#frm btn');btn.disabled=true;btn.innerHTML='<span class=spinner></span>';await fetch('/api/send',{method:'POST',body:fd});btn.disabled=false;btn.textContent='Enviar';}
+async function send(ev){ev.preventDefault();const t=document.getElementById('t');const f=document.getElementById('f');const fd=new FormData();fd.append('text',t.value);if(f.files[0])fd.append('photo',f.files[0]);t.value='';f.value='';const btn=document.querySelector('#frm button');btn.disabled=true;btn.innerHTML='<span class=spinner></span>';await fetch('/api/send',{method:'POST',body:fd});btn.disabled=false;btn.textContent='Enviar';}
 window.onload=()=>{poll();document.getElementById('frm').onsubmit=send;};
 """
 
@@ -162,11 +159,10 @@ def page(title: str, body: str, js: str = "") -> web.Response:
         "<nav><span class=logo>PlaceID<span small>Bot</span></span>"
         "<div><a href='/' class=active>Inicio</a>"
         "<a href='/canjear'>Canjear</a>"
-        "<a href='/app' class=cta-btn>Panel</a></div></nav>"
+        "<a href='/cuenta'>Cuenta</a></div></nav>"
         "<main>" + body + "</main>"
         "<footer>PlaceID Bot — Uso comercial con licencia. "
-        "<a href='https://discord.gg'>Discord</a> | "
-        "<a href='mailto:contacto@placeid.bot'>Contacto</a></footer>"
+        "<a href='https://discord.gg'>Discord</a></footer>"
         "<div class=toast id=toast></div>"
         + (f"<script>{js}</script>" if js else "")
         + "</body></html>"
@@ -191,11 +187,18 @@ async def index(_: web.Request) -> web.Response:
         "</div>"
         "<div class=fade-in style='max-width:600px;margin:0 auto'>"
         "<div class=card style='padding:24px;margin-bottom:24px'>"
-        "<form onsubmit='lookup(event)' style='display:flex;gap:10px'>"
+        "<div id=login-prompt>"
+        "<p style='color:#8899aa;margin-bottom:12px'>Inicia sesión para buscar.</p>"
+        "<input id=phone-login placeholder='Teléfono (34...)' style='margin-bottom:8px'>"
+        "<button onclick=doLogin() class='btn primary' style='width:100%'>Iniciar Sesión</button>"
+        "<p class=mut id=login-msg></p>"
+        "</div>"
+        "<form onsubmit='lookup(event)' style='display:none;flex-direction:column;gap:10px' id=search-form>"
         "<input id=url placeholder='https://maps.app.goo.gl/...' autofocus>"
-        "<button type=submit class='btn primary' style='width:auto'>Buscar</button>"
+        "<button type=submit class='btn primary'>Buscar Place ID</button>"
         "</form>"
         "<div id=out style='margin-top:16px'></div>"
+        "</div>"
         "</div>"
         "<div class=stats>"
         "<div class=stat><div class=number>3</div><div class=label>Búsquedas gratis / 24h</div></div>"
@@ -214,14 +217,14 @@ async def index(_: web.Request) -> web.Response:
         "<div class=card><div class=icon>📋</div><h3>Recibe</h3>"
         "<p>Nombre, dirección, Place ID y enlace directo para dejar reseña.</p></div>"
         "<div class=card><div class=icon>⚡</div><h3>Instantáneo</h3>"
-        "<p>Resultado en segundos. Se guarda en caché 24h para búsquedas repetidas.</p></div>"
+        "<p>Resultado en segundos. Se guarda en caché 24h.</p></div>"
         "</div></section>"
         "<div class=divider></div>"
         "<section class=fade-in>"
         "<div class=section-title>Planes</div>"
         "<div class=cards>"
         "<div class=card><div class=icon>🆓</div><h3>Gratis</h3>"
-        "<p>Perfecto para probar. 3 búsquedas cada 24 horas.</p>"
+        "<p>3 búsquedas cada 24 horas.</p>"
         "<div class=price>0<span> / mes</span></div></div>"
         "<div class=card popular><span class=tag>PRO</span><div class=icon>🚀</div><h3>PRO</h3>"
         "<p>Búsquedas ilimitadas. Chat con soporte. Webhook propio.</p>"
@@ -232,16 +235,41 @@ async def index(_: web.Request) -> web.Response:
         "<h2 class=section-title>Contacto</h2>"
         "<p class=section-sub>Para contratar el plan PRO o cualquier duda.</p>"
         "<a href='https://discord.gg' target=_blank><btn class='btn primary'>💬 Discord — Soporte</btn></a>"
-        "<p style='color:#8899aa;margin-top:16px;font-size:14px'>"
-        "o contacta directamente por el chat de la web.</p>"
         "</section>"
+        "<script>"
+        "async function doLogin(){"
+        "const p=document.getElementById('phone-login').value;"
+        "const m=document.getElementById('login-msg');"
+        "const d=await j('/api/login',{phone:p});"
+        "if(d.status==='new'){m.textContent='Crea tu cuenta:';"
+        "document.getElementById('login-prompt').innerHTML="
+        "'<input id=n-login placeholder=Nombre>'+"
+        "'<input id=a-login placeholder=Apellidos>'+"
+        "'<button onclick=reg() class=primary style=\"width:100%;margin-top:8px\">Crear</button>';"
+        "}else if(d.status==='confirm'){m.textContent='¿Eres <b>'+d.name+'</b>?';"
+        "document.getElementById('login-prompt').innerHTML+="
+        "'<button onclick=confirmLogin() class=primary style=\"width:100%;margin-top:8px\">Sí, soy yo</button>';"
+        "}else{m.textContent='Error';}"
+        "}"
+        "async function reg(){"
+        "const d=await j('/api/register',{phone:document.getElementById('phone-login').value,"
+        "first_name:document.getElementById('n-login').value,"
+        "last_name:document.getElementById('a-login').value});"
+        "if(d.ok){doLogin();}else{alert('Error: '+d.error);}"
+        "}"
+        "async function confirmLogin(){"
+        "const p=document.getElementById('phone-login').value;"
+        "const d=await j('/api/confirm',{phone:p});"
+        "if(d.ok){document.getElementById('login-prompt').style.display='none';"
+        "document.getElementById('search-form').style.display='flex';"
+        "document.getElementById('url').focus();}"
+        "else{alert('Error: teléfono no registrado');}"
+        "}"
+        "</script>"
     )
     return page("PlaceID Bot", body, JS_APP)
 
 async def app_page(request: web.Request) -> web.Response:
-    user = await current_user(request)
-    if not user:
-        return web.HTTPFound("/")
     raise web.HTTPFound("/")
 
 async def chat_page(request: web.Request) -> web.Response:
@@ -273,6 +301,12 @@ async def redeem_page(_: web.Request) -> web.Response:
         "<input id=w placeholder='Webhook para resultados (opcional)'>"
         "<button onclick='go()' class='btn primary' style='width:100%;margin-top:8px'>Canjear</button>"
         "<p class=mut id=m></p>"
+        "<div id=success-box style='display:none;margin-top:16px;text-align:center'>"
+        "<div style='font-size:48px'>✅</div>"
+        "<h3 style='margin:8px 0'>Licencia Activa</h3>"
+        "<p style='color:#5fd97a'>Tu licencia ha sido activada.</p>"
+        "<p class=mut id=success-detail></p>"
+        "</div>"
         "</div>"
         "<script>"
         "async function go(){const b={key:document.getElementById('k').value,"
@@ -283,8 +317,11 @@ async def redeem_page(_: web.Request) -> web.Response:
         "const r=await fetch('/api/redeem',{method:'POST',headers:"
         "{'Content-Type':'application/json'},body:JSON.stringify(b)});"
         "const d=await r.json();"
-        "document.getElementById('m').textContent=d.ok?'✅ Licencia activada.':'❌ '+d.error;"
-        "if(d.ok)setTimeout(()=>location.href='/app',1200);}"
+        "if(d.ok){document.getElementById('m').textContent='';"
+        "document.getElementById('login-box').style.display='none';"
+        "document.getElementById('success-box').style.display='block';"
+        "document.getElementById('success-detail').textContent='Licencia: '+d.key;"
+        "}else{document.getElementById('m').textContent='❌ '+d.error;}"
         "</script>"
         "</div>"
     )
@@ -458,7 +495,7 @@ async def api_redeem(request: web.Request):
         botmod.log.info("Sin canal Discord: %s", type(exc).__name__)
     await botmod.post_sales_webhook(res)
     token = await botmod.store.login_token(phone)
-    resp = web.json_response({"ok": True})
+    resp = web.json_response({"ok": True, "key": res["key"], "plan": res["plan"], "first_name": res["first_name"], "phone": phone})
     if token:
         resp.set_cookie(SESSION_COOKIE, token, httponly=True, samesite="lax")
     return resp

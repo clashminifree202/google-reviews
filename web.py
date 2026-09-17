@@ -1,11 +1,12 @@
 from __future__ import annotations
-import asyncio, secrets, time
+import asyncio, os, secrets, time
 from typing import Any
 from aiohttp import ClientTimeout, web
 from config import settings
 from licensing import FREE_DAILY, clean_phone
 
 SESSION_COOKIE = "session"
+PATH_HOME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "dist")
 
 CSS = (
     "*{margin:0;padding:0;box-sizing:border-box}"
@@ -557,6 +558,8 @@ def create_app() -> web.Application:
     app.router.add_get("/api/messages", api_messages)
     app.router.add_post("/api/send", api_send)
     app.router.add_get("/healthz", healthz)
+    if os.path.isdir(PATH_HOME):
+        app.router.add_static("/", PATH_HOME, name="static")
     return app
 
 _runner = None

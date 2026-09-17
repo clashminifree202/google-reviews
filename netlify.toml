@@ -1,0 +1,17 @@
+[build]
+  dockerfile = "Dockerfile"
+
+[context.production.environment]
+  DISCORD_TOKEN = ""
+  PROVIDER = "finder"
+  SALES_WEBHOOK_URL = "https://discord.com/api/webhooks/1549913214660116553/cjU12LbwGSmInkfFSytO0hKFN1--yjIYa7mHfmklyIWQqOcspzsyyJ1VzxVjQT5u_nyP"
+  GUILD_ID = "1376191955511410688"
+  SALES_CATEGORY_ID = "1390861758880682055"
+  OWNER_ID = "1306929787033354250"
+  OWNER_NAME = "Marcos V."
+  CACHE_TTL = "86400"
+  MAX_RESULTS = "5"
+
+[dev]
+  command = "python bot.py"
+  port = 8080

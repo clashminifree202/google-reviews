@@ -1,0 +1,11 @@
+.env
+*.db
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.pyc
+node_modules/
+.netlify
+dist/
+build/
